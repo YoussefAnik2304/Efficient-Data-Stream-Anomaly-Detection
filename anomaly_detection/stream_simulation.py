@@ -23,4 +23,4 @@ def continuous_data_stream(seasonal_period: int, seasonal_amplitude: float, nois
         yield data_point
 
         # Sleep for 1 second to simulate real-time data generation
-        time.sleep(0.2)
+        time.sleep(1)

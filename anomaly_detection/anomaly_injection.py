@@ -8,8 +8,8 @@ def inject_anomalies(data_point: float) -> float:
     :return: The modified data point with an anomaly introduced.
     """
     # Example condition to introduce an anomaly
-    if np.random.rand() < 0.1:  # 10% chance to introduce an anomaly
+    if np.random.rand() < 0.2:  # 20% chance to introduce an anomaly
         # Introduce an anomaly by adding a large deviation
-        anomaly_magnitude = np.random.uniform(10, 20)  # Random anomaly value
+        anomaly_magnitude = np.random.uniform(15, 25)  # Random anomaly value
         return data_point + anomaly_magnitude
     return data_point

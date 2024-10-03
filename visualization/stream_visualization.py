@@ -34,7 +34,7 @@ def update_plot(line, data_stream, anomalies=None):
         plt.xlim(0, 50)  # Keep the limits if there are less than 100 points
 
     # Update the y-axis limits if not set already
-    plt.ylim(-30, 30)  # Keep y-axis limits fixed between 0 and 200
+    plt.ylim(-40, 40)  # Keep y-axis limits fixed between 0 and 200
 
     # Plot anomalies if they exist
     if anomalies is not None and len(anomalies) > 0:
@@ -42,4 +42,4 @@ def update_plot(line, data_stream, anomalies=None):
         plt.scatter(anomalies, anomaly_values, color='red', label='Anomalies', zorder=5)
 
     plt.draw()  # Redraw the updated plot
-    plt.pause(0.1)  # Pause to allow for the plot to update
+    plt.pause(1)  # Pause to allow for the plot to update
