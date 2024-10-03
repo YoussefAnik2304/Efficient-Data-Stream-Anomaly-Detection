@@ -1,32 +1,26 @@
 import numpy as np
+import time
 
-def simulate_data_stream(num_points=1000, seasonal_period=50, seasonal_amplitude=10, noise_level=5):
+def continuous_data_stream(seasonal_period: int, seasonal_amplitude: float, noise_level: float):
     """
-    Simulate a data stream with regular patterns, seasonal elements, and random noise.
+    Generates a continuous data stream with seasonal patterns and noise.
 
-    Parameters:
-    - num_points: Number of data points to generate.
-    - seasonal_period: The period of the seasonal component.
-    - seasonal_amplitude: Amplitude of the seasonal fluctuations.
-    - noise_level: Standard deviation of the random noise.
-
-    Returns:
-    - A numpy array representing the simulated data stream.
+    :param seasonal_period: The period of the seasonal component.
+    :param seasonal_amplitude: The amplitude of the seasonal component.
+    :param noise_level: The standard deviation of the noise to be added.
+    :yield: A new data point continuously.
     """
-    
-    # Time array for the simulation
-    time = np.arange(num_points)
+    time_elapsed = 0
+    while True:
+        # Generate seasonal component
+        seasonal_component = seasonal_amplitude * np.sin(2 * np.pi * time_elapsed / seasonal_period)
+        
+        # Generate noise
+        noise = np.random.normal(0, noise_level)
+        
+        # Generate the final data point
+        data_point = seasonal_component + noise
+        yield data_point
 
-    # Regular pattern (e.g., linear trend)
-    regular_pattern = 0.05 * time  # Linear trend
-
-    # Seasonal pattern (e.g., sine wave)
-    seasonal_pattern = seasonal_amplitude * np.sin(2 * np.pi * time / seasonal_period)
-
-    # Random noise
-    noise = np.random.normal(0, noise_level, num_points)
-
-    # Combine all components to create the final data stream
-    data_stream = regular_pattern + seasonal_pattern + noise
-
-    return data_stream
+        # Sleep for 1 second to simulate real-time data generation
+        time.sleep(0.2)

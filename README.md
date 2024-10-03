@@ -13,3 +13,6 @@ This project implements a Python-based anomaly detection system for a continuous
 2. Install the dependencies:
    ```bash
    pip install -r requirements.txt
+3. Run the project : 
+    ```bash 
+    python main.py

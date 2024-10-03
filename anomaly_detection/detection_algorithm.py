@@ -1,13 +1,17 @@
-import numpy as np
+class AnomalyDetector:
+    def __init__(self, threshold: float = 15.0):
+        """
+        Initializes the anomaly detector with a specified threshold.
 
-def detect_anomalies(data_stream, threshold=2.5):
-    """Detects anomalies in the data stream based on a simple threshold approach."""
-    mean = np.mean(data_stream)
-    std_dev = np.std(data_stream)
-    
-    anomalies = []
-    for i, value in enumerate(data_stream):
-        if abs(value - mean) > threshold * std_dev:
-            anomalies.append(i)  # Flag the index as an anomaly
-    
-    return anomalies
+        :param threshold: The threshold value for detecting anomalies.
+        """
+        self.threshold = threshold
+
+    def detect(self, data_point: float) -> bool:
+        """
+        Detects if the given data point is an anomaly.
+
+        :param data_point: The data point to check for anomalies.
+        :return: True if the data point is an anomaly, False otherwise.
+        """
+        return abs(data_point) > self.threshold  # Adjust based on your criteria
