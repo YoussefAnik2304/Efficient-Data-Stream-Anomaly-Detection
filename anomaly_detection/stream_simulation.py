@@ -1,26 +1,31 @@
 import numpy as np
-import time
+import matplotlib.pyplot as plt
 
-def continuous_data_stream(seasonal_period: int, seasonal_amplitude: float, noise_level: float):
+# Data Generation
+def continuous_data_stream(n_points=100, amplitude=10, noise_level=3):
     """
-    Generates a continuous data stream with seasonal patterns and noise.
-
-    :param seasonal_period: The period of the seasonal component.
-    :param seasonal_amplitude: The amplitude of the seasonal component.
-    :param noise_level: The standard deviation of the noise to be added.
-    :yield: A new data point continuously.
+    Generate a data stream with regular, seasonal, and random components.
+    
+    Args:
+    - n_points (int): Number of data points.
+    - amplitude (float): Amplitude for the seasonal sine wave.
+    - noise_level (float): Standard deviation for the random noise.
+    
+    Returns:
+    - np.array: Generated data stream.
     """
-    time_elapsed = 0
-    while True:
-        # Generate seasonal component
-        seasonal_component = seasonal_amplitude * np.sin(2 * np.pi * time_elapsed / seasonal_period)
-        
-        # Generate noise
-        noise = np.random.normal(0, noise_level)
-        
-        # Generate the final data point
-        data_point = seasonal_component + noise
-        yield data_point
-
-        # Sleep for 1 second to simulate real-time data generation
-        time.sleep(1)
+    # Time points
+    t = np.arange(0, n_points)
+    
+    # Regular component (linear trend or constant)
+    regular_component = 0.05 * t
+    
+    # Seasonal component (sine wave to represent cycles)
+    seasonal_component = amplitude * np.sin(2 * np.pi * t / 20)  # 20-point cycle
+    
+    # Random component (noise)
+    random_component = np.random.normal(0, noise_level, n_points)
+    
+    # Final data stream
+    data_stream = regular_component + seasonal_component + random_component
+    return data_stream

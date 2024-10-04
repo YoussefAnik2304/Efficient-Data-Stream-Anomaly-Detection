@@ -2,7 +2,8 @@ import numpy as np
 import threading
 import time
 from anomaly_detection import continuous_data_stream, inject_anomalies, AnomalyDetector
-from visualization import plot_anomalies, update_plot
+from visualization import plot_anomalies, update_plot, close_plot
+import matplotlib.pyplot as plt
 
 # Initialize the anomaly detector
 anomaly_detector = AnomalyDetector(threshold=15.0)
@@ -37,10 +38,18 @@ def main():
     # Prepare the initial plot
     line = plot_anomalies(data_points, anomalies=[i for i, is_anomaly in enumerate(anomaly_flags) if is_anomaly])
 
-    # Update the plot continuously
-    while True:
-        update_plot(line, data_points, anomalies=[i for i, is_anomaly in enumerate(anomaly_flags) if is_anomaly])
-        time.sleep(0.2)  # Control the update frequency
+    # Use plt.show(block=False) to keep the plot window interactive but non-blocking
+    plt.show(block=False)
+
+    # Update the plot continuously, handle graceful shutdown of the plot window
+    try:
+        while plt.fignum_exists(1):  # Check if the plot window is still open
+            update_plot(line, data_points, anomalies=[i for i, is_anomaly in enumerate(anomaly_flags) if is_anomaly])
+            plt.pause(0.5)  # Pause for plot updates
+    except KeyboardInterrupt:
+        print("Plotting interrupted by user.")
+    finally:
+        close_plot()  # Ensure the plot is properly closed on exit
 
 if __name__ == "__main__":
     main()
