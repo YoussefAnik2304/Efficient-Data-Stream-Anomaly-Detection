@@ -1,61 +1,48 @@
-import numpy as np
-import threading
-import time
-from anomaly_detection import continuous_data_stream, inject_anomalies, AnomalyDetector
-from visualization import plot_anomalies, update_plot, close_plot
+import pandas as pd
 import matplotlib.pyplot as plt
+import yfinance as yf
 
-# Initialize the anomaly detector
-anomaly_detector = AnomalyDetector(threshold=15.0)
+from adtk.data import validate_series
+from adtk.visualization import plot
+from adtk.detector import ThresholdAD, QuantileAD, InterQuartileRangeAD, GeneralizedESDTestAD, PersistAD, VolatilityShiftAD, CustomizedDetectorHD
 
-# Initialize lists to store data for plotting (with a rolling window of size 50)
-data_points = []
-anomaly_flags = []
-MAX_DATA_POINTS = 50  # Rolling window size for visualization
+# Load and preprocess data
+s_train = pd.read_csv("temperature.csv", parse_dates=True)
+s_train["Date"] = pd.to_datetime(s_train["Date"])
+s_train = s_train.set_index("Date")
+s_train = s_train['Mean']
 
-# Function to generate data continuously
-def generate_data(seasonal_period, seasonal_amplitude, noise_level):
-    """
-    Generates data continuously and injects anomalies into the stream.
-    """
-    for data_point in continuous_data_stream(seasonal_period, seasonal_amplitude, noise_level):
-        # Introduce anomalies into the data point
-        modified_data_point = inject_anomalies(data_point)
+# Validate the series
+s_train = validate_series(s_train)
+# Change to a different style before calling the plot
 
-        # Check for anomalies
-        is_anomaly = anomaly_detector.detect(modified_data_point)
+# Plot the data
+# plot(s_train)
+# plt.show()
 
-        # Append the data point and its anomaly status to the lists
-        data_points.append(modified_data_point)
-        anomaly_flags.append(is_anomaly)
 
-        # Keep only the last MAX_DATA_POINTS data points
-        if len(data_points) > MAX_DATA_POINTS:
-            data_points.pop(0)
-            anomaly_flags.pop(0)
+#Threshold Anomaly Detection (manually define min max threshold)
+threshold_ad = ThresholdAD(high=0.75, low=-0.5)
+anomalies = threshold_ad.detect(s_train)
+plot(s_train, anomaly=anomalies, anomaly_color="blue", anomaly_tag="marker")
+plt.show()
 
-        # Wait for a second before generating the next data point
-        time.sleep(1)
+# # Quantile Anomaly Detection (manually define percentiles)
+# quantile_ad = QuantileAD(high=0.99, low=0.01)
+# anomalies = quantile_ad.fit_detect(s_train)
+# plot(s_train, anomaly=anomalies, ts_linewidth=1, ts_markersize=3, anomaly_markersize=5, anomaly_color='blue', anomaly_tag="marker")
+# plt.show()
 
-def main():
-    # Start data generation in a separate thread
-    threading.Thread(target=generate_data, args=(20, 10, 5), daemon=True).start()
+# # Inter Quartile Range Anomaly Detection (IQR = Q3 - Q1, with c we multiply for tolerance, so c * IQR)
+# iqr_ad = InterQuartileRangeAD(c=1.5)
+# anomalies = iqr_ad.fit_detect(s_train)
+# plot(s_train, anomaly=anomalies, ts_linewidth=1, ts_markersize=3, anomaly_markersize=5, anomaly_color='blue', anomaly_tag="marker")
+# plt.show()
 
-    # Prepare the initial plot and get line, scatter, and axis references
-    line, scatter, ax = plot_anomalies(data_points, anomalies=[i for i, is_anomaly in enumerate(anomaly_flags) if is_anomaly])
+# # Generalized Extreme Studentized Deviate (ESD) Test (assumes normal distribution, only use when this assumption makes sense)
+# esd_ad = GeneralizedESDTestAD(alpha=1)
+# anomalies = esd_ad.fit_detect(s_train)
+# plot(s_train, anomaly=anomalies, ts_linewidth=1, ts_markersize=3, anomaly_markersize=5, anomaly_color='blue', anomaly_tag="marker")
+# plt.show()
 
-    # Use plt.show(block=False) to keep the plot window interactive but non-blocking
-    plt.show(block=False)
 
-    # Update the plot continuously, handle graceful shutdown of the plot window
-    try:
-        while plt.fignum_exists(1):  # Check if the plot window is still open
-            scatter = update_plot(line, scatter, ax, data_points, anomalies=[i for i, is_anomaly in enumerate(anomaly_flags) if is_anomaly])
-            plt.pause(0.5)  # Pause for plot updates
-    except KeyboardInterrupt:
-        print("Plotting interrupted by user.")
-    finally:
-        close_plot()  # Ensure the plot is properly closed on exit
-
-if __name__ == "__main__":
-    main()
